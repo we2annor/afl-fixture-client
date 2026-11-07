@@ -44,7 +44,7 @@ export function MatchList({
   return (
     <div
       data-testid='match-list'
-      className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3'
+      className='grid grid-cols-1 items-start gap-4 md:grid-cols-2 lg:grid-cols-3'
     >
       {matches.map((match) => (
         <MatchCard key={match.id} match={match} />
