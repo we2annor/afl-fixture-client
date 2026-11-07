@@ -19,7 +19,7 @@ export interface Match {
   roundOrder: number;
   type: { id: number; name: string; code: string };
   squads: { home?: Squad; away?: Squad };
-  date: { startDate: string; startTime: string; utcMatchStart: string };
+  date?: { startDate: string; startTime: string; utcMatchStart: string };
   venue?: { id: number; code: string; name: string; timeZone: string };
   status: { name: string; code: string };
 }

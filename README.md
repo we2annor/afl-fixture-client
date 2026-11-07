@@ -8,14 +8,11 @@ matches by round, venue, or team.
 On load, the app fetches the full season fixture from a remote API, flattens
 it into a single list of matches, and renders each match as a card showing
 the two teams, kickoff time, venue, score (once played), and status. Three
-labelled filters above the list — **Filter by Rounds**, **Filter by Venue**,
-and **Filter by Teams** — let you narrow the list down; they can be combined
-(e.g. a specific team at a specific venue).
-
-The page has a site header (title) and footer (copyright), the layout is
-mobile-first (filters stack and cards go single-column on small screens,
-widening up through tablet/desktop breakpoints), and loading/error/empty
-states are exposed to screen readers via ARIA live regions.
+filters above the list — **Filter by Rounds**, **Filter by Venue**, and
+**Filter by Teams** — let you narrow the list down, and they combine (e.g. a
+specific team at a specific venue). The layout is mobile-first: a single
+column of cards and stacked filters on small screens, widening to two
+columns at tablet width and three columns with filters in a row on desktop.
 
 ### Data source
 
@@ -38,7 +35,11 @@ public and unauthenticated.
 
 ## Tech stack
 
-- **[Next.js](https://nextjs.org)** (App Router) + React 19 + TypeScript
+- **[Next.js](https://nextjs.org)** (App Router) + React 19 + TypeScript —
+  not a technical necessity for an app this size, but a deliberate choice:
+  it's a common production stack (including, as far as I'm aware, at
+  companies like Champion Data), so building on it here doubles as a
+  signal of being comfortable in that environment.
 - **[TanStack Query](https://tanstack.com/query)** for fetching and caching
   the fixture (`hooks/useFixture.ts`)
 - **[shadcn/ui](https://ui.shadcn.com)** components built on
@@ -46,17 +47,46 @@ public and unauthenticated.
 - **[Vitest](https://vitest.dev)** + **React Testing Library** for unit and
   integration tests
 
+## Decisions worth explaining
+
+- **The nested API response is flattened once, at the data layer.** Rather
+  than filtering through `phases → rounds → matches` everywhere a component
+  needs the fixture, `flattenFixture()` collapses it into a single
+  `FlatMatch[]` immediately after fetch, carrying `roundNumber`/`roundName`
+  forward onto each match. Every component downstream works with one flat
+  list.
+- **TanStack Query instead of `fetch` + `useEffect`.** The fixture is fetched
+  once and doesn't change mid-session, so it's cached with a one-hour
+  `staleTime` rather than re-fetched on every mount or filter change.
+  Selecting a filter never triggers a new network request, it just narrows
+  what's rendered from the already-cached list.
+- **Controlled filter components**, with `page.tsx` owning the selected
+  round/venue/team as state and passing it down, rather than uncontrolled
+  selects managing their own internal state. This keeps all three filters
+  combinable through one predictable `.filter()` chain instead of each
+  filter having to coordinate with the others independently.
+- **Defensive handling of incomplete fixture data.** The live API includes
+  bye rounds (a real match object against a placeholder "Bye" team, with no
+  venue) and at least one fixture slot missing its scheduled date. `date`,
+  `venue`, and each side of `squads` are typed as optional, and `MatchCard`
+  renders sensible fallbacks ("Venue TBC", "Date TBC") rather than assuming
+  every field is always present.
+
+## What's intentionally left out
+
+No backend, authentication, or database — per the brief's scope, this is a
+read-only client fetching directly from the provided public API.
+
 ## Project structure
 
 ```
 app/                  Next.js App Router pages, layout, and providers
 components/layout/    Site chrome: Header (title) and Footer (copyright)
 components/fixture/   The fixture UI: MatchCard, MatchList, and the three filters
-components/ui/        shadcn/ui primitives (Select, Card, Badge, Label, Button, ...)
+components/ui/        shadcn/ui primitives (Select, Card, Badge, Label, ...)
 hooks/useFixture.ts   TanStack Query hook that fetches + flattens the fixture
 lib/fixture.ts        Fetching, flattening, and filter-option logic
 lib/types.ts          TypeScript types matching the fixture API's response shape
-lib/utils.ts          shadcn's `cn()` className helper
 ```
 
 ## Getting started
@@ -80,10 +110,14 @@ page auto-updates as you edit the code.
 
 ## Testing
 
-Tests use Vitest with jsdom and React Testing Library, covering the data
-layer (`lib/fixture.ts`), the query hook, each component, and an end-to-end
-integration test of the page (mocked fetch, driving the filters, asserting
-on the rendered results).
+Tests use Vitest with jsdom and React Testing Library, covering:
+
+- `lib/fixture.ts` — `flattenFixture()`, the `getRounds`/`getVenues`/`getTeams` helpers, and `fetchFixture()`'s error handling
+- `useFixture` — the query hook's loading/success/error states, with `fetchFixture` mocked
+- `MatchCard` — team/venue/date fallbacks, score display, and decorative logo alt text
+- `VenueFilter`, `RoundFilter`, `TeamFilter` — rendering, selection, and the "all" reset option
+- `MatchList` — loading, error, empty, and populated states
+- An end-to-end integration test of the page — mocked fetch, driving the filters, asserting on rendered results
 
 Run the test suite once:
 
@@ -97,6 +131,14 @@ Or in watch mode while developing:
 npm run test:watch
 ```
 
+## Deployment
+
+Live: https://afl-fixture-client.vercel.app
+Repo: https://github.com/we2annor/afl-fixture-client
+
+Hosted on Vercel, connected to this repo — every push to `main` triggers a
+new production deployment automatically.
+
 ## Other scripts
 
 ```bash
@@ -104,7 +146,3 @@ npm run build   # production build
 npm start       # run the production build (after `npm run build`)
 npm run lint    # ESLint
 ```
-
-## Author
-
-Ernest Annor
