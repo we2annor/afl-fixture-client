@@ -16,7 +16,7 @@ type VenueFilterProps = {
 
 export function VenueFilter({ venues, value, onChange }: VenueFilterProps) {
   const selectedLabel =
-    value === null ? undefined : venues.find((v) => v.id === value)?.name;
+    value === null ? "All venues" : venues.find((v) => v.id === value)?.name;
   return (
     <Select
       value={value === null ? "all" : String(value)}

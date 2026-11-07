@@ -16,7 +16,7 @@ type TeamFilterProps = {
 
 export function TeamFilter({ teams, value, onChange }: TeamFilterProps) {
   const selectedLabel =
-    value === null ? undefined : teams.find((t) => t.id === value)?.name;
+    value === null ? "All Teams" : teams.find((t) => t.id === value)?.name;
   return (
     <Select
       value={value === null ? "all" : String(value)}

@@ -16,7 +16,9 @@ type RoundFilterProps = {
 
 export function RoundFilter({ rounds, value, onChange }: RoundFilterProps) {
   const selectedLabel =
-    value === null ? undefined : rounds.find((r) => r.number === value)?.name;
+    value === null
+      ? "All rounds"
+      : rounds.find((r) => r.number === value)?.name;
   return (
     <Select
       value={value === null ? "all" : String(value)}
