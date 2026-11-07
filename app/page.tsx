@@ -32,10 +32,7 @@ export default function Home() {
   }, [data, round, venue, team]);
 
   return (
-    <main className='mx-auto w-full max-w-5xl px-4 py-6'>
-      <h1 className='mb-4 text-xl font-semibold'>
-        Australian Football League (FL) Fixture
-      </h1>
+    <main className='mx-auto w-full max-w-5xl flex-1 px-4 py-6'>
       <div className='mb-4 flex flex-col gap-2 md:flex-row md:items-center'>
         <RoundFilter rounds={rounds} value={round} onChange={setRound} />
         <VenueFilter venues={venues} value={venue} onChange={setVenue} />
