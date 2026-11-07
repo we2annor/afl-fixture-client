@@ -19,7 +19,7 @@ export function VenueFilter({ venues, value, onChange }: VenueFilterProps) {
     value === null ? undefined : venues.find((v) => v.id === value)?.name;
   return (
     <Select
-      value={value === null ? "All Venues" : String(value)}
+      value={value === null ? "all" : String(value)}
       onValueChange={(v) => onChange(v === "all" ? null : Number(v))}
     >
       <SelectTrigger className='w-full md:w-48'>

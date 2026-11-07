@@ -19,7 +19,7 @@ export function TeamFilter({ teams, value, onChange }: TeamFilterProps) {
     value === null ? undefined : teams.find((t) => t.id === value)?.name;
   return (
     <Select
-      value={value === null ? "All Teams" : String(value)}
+      value={value === null ? "all" : String(value)}
       onValueChange={(v) => onChange(v === "all" ? null : Number(v))}
     >
       <SelectTrigger className='w-full md:w-48'>

@@ -19,7 +19,7 @@ export function RoundFilter({ rounds, value, onChange }: RoundFilterProps) {
     value === null ? undefined : rounds.find((r) => r.number === value)?.name;
   return (
     <Select
-      value={value === null ? "All Rounds" : String(value)}
+      value={value === null ? "all" : String(value)}
       onValueChange={(v) => onChange(v === "all" ? null : Number(v))}
     >
       <SelectTrigger className='w-full md:w-48'>
