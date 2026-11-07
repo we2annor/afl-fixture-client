@@ -17,9 +17,13 @@ export function MatchList({
 }: MatchListProps) {
   if (isPending) {
     return (
-      <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3'>
+      <div
+        role='status'
+        aria-label='Loading fixture'
+        className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3'
+      >
         {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className='h-32 w-full' />
+          <Skeleton key={i} aria-hidden='true' className='h-32 w-full' />
         ))}
       </div>
     );
@@ -30,12 +34,16 @@ export function MatchList({
       error instanceof Error
         ? error.message
         : "something went wrong loading the fixture.";
-    return <p className='text-sm text-destructive'>{message}</p>;
+    return (
+      <p role='alert' className='text-sm text-destructive'>
+        {message}
+      </p>
+    );
   }
 
   if (!matches || matches.length === 0) {
     return (
-      <p className='text-sm text-muted-foreground'>
+      <p role='status' className='text-sm text-muted-foreground'>
         No matches for this selection
       </p>
     );

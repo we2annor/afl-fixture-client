@@ -89,4 +89,14 @@ describe("MatchCard", () => {
 
     expect(screen.getByText("Not yet played")).toBeInTheDocument();
   });
+
+  it("marks team logos as decorative so the team name isn't announced twice", () => {
+    const { container } = render(<MatchCard match={makeMatch()} />);
+
+    const logos = container.querySelectorAll("img");
+    expect(logos).toHaveLength(2);
+    for (const logo of logos) {
+      expect(logo).toHaveAttribute("alt", "");
+    }
+  });
 });

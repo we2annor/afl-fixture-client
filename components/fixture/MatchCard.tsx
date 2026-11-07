@@ -11,15 +11,18 @@ import { Badge } from "@/components/ui/badge";
 import { FlatMatch } from "@/lib/fixture";
 import { useState } from "react";
 
-function TeamLogo({ code, name }: { code: string; name: string }) {
+// Decorative: the team name is already shown as visible text next to this
+// logo, so the image (and its error fallback) are hidden from assistive tech
+// to avoid announcing the team name twice.
+function TeamLogo({ code }: { code: string }) {
   const [errored, setErrored] = useState(false);
   if (errored) {
-    return <span>{code}</span>;
+    return <span aria-hidden='true'>{code}</span>;
   }
   return (
     <Image
       src={logoUrl(code)}
-      alt={name}
+      alt=''
       width={32}
       height={32}
       onError={() => setErrored(true)}
@@ -50,15 +53,11 @@ export function MatchCard({ match }: { match: FlatMatch }) {
           <span className='truncate font-medium'>
             {squads.home?.name ?? "TBC"}
           </span>
-          {squads.home && (
-            <TeamLogo code={squads.home.code} name={squads.home.name} />
-          )}
+          {squads.home && <TeamLogo code={squads.home.code} />}
         </div>
         <span className='text-sm text-muted-foreground'>vs</span>
         <div className='flex min-w-0 items-center gap-2'>
-          {squads.away && (
-            <TeamLogo code={squads.away.code} name={squads.away.name} />
-          )}
+          {squads.away && <TeamLogo code={squads.away.code} />}
           <span className='truncate font-medium'>
             {squads.away?.name ?? "TBC"}
           </span>

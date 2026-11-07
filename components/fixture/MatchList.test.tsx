@@ -25,15 +25,16 @@ function makeMatch(id: number): FlatMatch {
 }
 
 describe("MatchList", () => {
-  it("renders loading skeletons while pending", () => {
+  it("renders loading skeletons in an accessible status region while pending", () => {
     const { container } = render(
       <MatchList matches={undefined} isPending={true} isError={false} error={null} />
     );
 
     expect(container.querySelectorAll('[data-slot="skeleton"]').length).toBeGreaterThan(0);
+    expect(screen.getByRole("status", { name: "Loading fixture" })).toBeInTheDocument();
   });
 
-  it("renders the error message when the query fails", () => {
+  it("renders the error message as an alert when the query fails", () => {
     render(
       <MatchList
         matches={undefined}
@@ -43,7 +44,9 @@ describe("MatchList", () => {
       />
     );
 
-    expect(screen.getByText("Fixture request failed: 500")).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Fixture request failed: 500"
+    );
   });
 
   it("renders a generic error message when the error is not an Error instance", () => {
@@ -56,10 +59,12 @@ describe("MatchList", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders an empty-state message when there are no matches", () => {
+  it("renders an empty-state status message when there are no matches", () => {
     render(<MatchList matches={[]} isPending={false} isError={false} error={null} />);
 
-    expect(screen.getByText("No matches for this selection")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "No matches for this selection"
+    );
   });
 
   it("renders a MatchCard per match", () => {
