@@ -9,6 +9,13 @@ const teams = [
 ];
 
 describe("TeamFilter", () => {
+  it("labels the select 'Filter by Teams'", () => {
+    render(<TeamFilter teams={teams} value={null} onChange={vi.fn()} />);
+    expect(screen.getByLabelText("Filter by Teams")).toBe(
+      screen.getByRole("combobox")
+    );
+  });
+
   it("shows the 'All Teams' placeholder when nothing is selected", () => {
     render(<TeamFilter teams={teams} value={null} onChange={vi.fn()} />);
     expect(screen.getByRole("combobox")).toHaveTextContent("All Teams");

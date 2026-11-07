@@ -9,6 +9,13 @@ const venues = [
 ];
 
 describe("VenueFilter", () => {
+  it("labels the select 'Filter by Venue'", () => {
+    render(<VenueFilter venues={venues} value={null} onChange={vi.fn()} />);
+    expect(screen.getByLabelText("Filter by Venue")).toBe(
+      screen.getByRole("combobox")
+    );
+  });
+
   it("shows the 'All venues' placeholder when nothing is selected", () => {
     render(<VenueFilter venues={venues} value={null} onChange={vi.fn()} />);
     expect(screen.getByRole("combobox")).toHaveTextContent("All venues");

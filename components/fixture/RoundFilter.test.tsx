@@ -9,6 +9,13 @@ const rounds = [
 ];
 
 describe("RoundFilter", () => {
+  it("labels the select 'Filter by Rounds'", () => {
+    render(<RoundFilter rounds={rounds} value={null} onChange={vi.fn()} />);
+    expect(screen.getByLabelText("Filter by Rounds")).toBe(
+      screen.getByRole("combobox")
+    );
+  });
+
   it("shows the 'All rounds' placeholder when nothing is selected", () => {
     render(<RoundFilter rounds={rounds} value={null} onChange={vi.fn()} />);
     expect(screen.getByRole("combobox")).toHaveTextContent("All rounds");
