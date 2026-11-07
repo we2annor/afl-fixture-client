@@ -8,9 +8,14 @@ matches by round, venue, or team.
 On load, the app fetches the full season fixture from a remote API, flattens
 it into a single list of matches, and renders each match as a card showing
 the two teams, kickoff time, venue, score (once played), and status. Three
-filters above the list — **Filter by Rounds**, **Filter by Venue**, and
-**Filter by Teams** — let you narrow the list down; they can be combined
+labelled filters above the list — **Filter by Rounds**, **Filter by Venue**,
+and **Filter by Teams** — let you narrow the list down; they can be combined
 (e.g. a specific team at a specific venue).
+
+The page has a site header (title) and footer (copyright), the layout is
+mobile-first (filters stack and cards go single-column on small screens,
+widening up through tablet/desktop breakpoints), and loading/error/empty
+states are exposed to screen readers via ARIA live regions.
 
 ### Data source
 
@@ -45,11 +50,13 @@ public and unauthenticated.
 
 ```
 app/                  Next.js App Router pages, layout, and providers
+components/layout/    Site chrome: Header (title) and Footer (copyright)
 components/fixture/   The fixture UI: MatchCard, MatchList, and the three filters
-components/ui/        shadcn/ui primitives (Select, Card, Badge, Label, ...)
+components/ui/        shadcn/ui primitives (Select, Card, Badge, Label, Button, ...)
 hooks/useFixture.ts   TanStack Query hook that fetches + flattens the fixture
 lib/fixture.ts        Fetching, flattening, and filter-option logic
 lib/types.ts          TypeScript types matching the fixture API's response shape
+lib/utils.ts          shadcn's `cn()` className helper
 ```
 
 ## Getting started
@@ -97,3 +104,7 @@ npm run build   # production build
 npm start       # run the production build (after `npm run build`)
 npm run lint    # ESLint
 ```
+
+## Author
+
+Ernest Annor
