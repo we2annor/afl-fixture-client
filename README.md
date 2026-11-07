@@ -1,36 +1,99 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AFL Fixture
 
-## Getting Started
+A small Next.js app that displays the AFL season fixture and lets you filter
+matches by round, venue, or team.
 
-First, run the development server:
+## What it does
+
+On load, the app fetches the full season fixture from a remote API, flattens
+it into a single list of matches, and renders each match as a card showing
+the two teams, kickoff time, venue, score (once played), and status. Three
+filters above the list — **Filter by Rounds**, **Filter by Venue**, and
+**Filter by Teams** — let you narrow the list down; they can be combined
+(e.g. a specific team at a specific venue).
+
+### Data source
+
+Match data comes from a single public endpoint, called client-side on page
+load:
+
+```
+https://0p0s8y841d.execute-api.ap-southeast-2.amazonaws.com/test/react-code-test/fixture
+```
+
+It returns the whole season as a list of phases, each containing rounds,
+each containing matches (see `lib/types.ts` for the exact shape). Team logos
+are fetched from a companion S3 bucket at
+`https://react-code-test.s3.ap-southeast-2.amazonaws.com/logos/<TEAM_CODE>.svg`;
+if a logo fails to load, the match card falls back to showing the team's
+short code instead.
+
+No API key or environment configuration is needed — both endpoints are
+public and unauthenticated.
+
+## Tech stack
+
+- **[Next.js](https://nextjs.org)** (App Router) + React 19 + TypeScript
+- **[TanStack Query](https://tanstack.com/query)** for fetching and caching
+  the fixture (`hooks/useFixture.ts`)
+- **[shadcn/ui](https://ui.shadcn.com)** components built on
+  **[`@base-ui/react`](https://base-ui.com)**, styled with Tailwind CSS v4
+- **[Vitest](https://vitest.dev)** + **React Testing Library** for unit and
+  integration tests
+
+## Project structure
+
+```
+app/                  Next.js App Router pages, layout, and providers
+components/fixture/   The fixture UI: MatchCard, MatchList, and the three filters
+components/ui/        shadcn/ui primitives (Select, Card, Badge, Label, ...)
+hooks/useFixture.ts   TanStack Query hook that fetches + flattens the fixture
+lib/fixture.ts        Fetching, flattening, and filter-option logic
+lib/types.ts          TypeScript types matching the fixture API's response shape
+```
+
+## Getting started
+
+Requires Node.js 20+.
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the app. The
+page auto-updates as you edit the code.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Testing
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Tests use Vitest with jsdom and React Testing Library, covering the data
+layer (`lib/fixture.ts`), the query hook, each component, and an end-to-end
+integration test of the page (mocked fetch, driving the filters, asserting
+on the rendered results).
 
-## Learn More
+Run the test suite once:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm test
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Or in watch mode while developing:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm run test:watch
+```
 
-## Deploy on Vercel
+## Other scripts
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run build   # production build
+npm start       # run the production build (after `npm run build`)
+npm run lint    # ESLint
+```
