@@ -73,6 +73,49 @@ function makeFixture(): FixtureResponse {
   };
 }
 
+function makeManyMatchesFixture(roundNumber: number, count: number) {
+  return {
+    code: `R${roundNumber}`,
+    number: roundNumber,
+    name: `Round ${roundNumber}`,
+    matches: Array.from({ length: count }, (_, i) => ({
+      id: roundNumber * 1000 + i,
+      roundOrder: i + 1,
+      type: { id: 1, name: "Home and Away", code: "HA" },
+      squads: {
+        home: {
+          id: roundNumber * 1000 + i,
+          code: `H${i}`,
+          name: `Round ${roundNumber} Home ${i + 1}`,
+        },
+        away: { id: 9000 + i, code: "AWY", name: "Away" },
+      },
+      date: {
+        startDate: "2026-03-01",
+        startTime: "19:30",
+        utcMatchStart: "2026-03-01T08:30:00Z",
+      },
+      venue: { id: 100, code: "MCG", name: "MCG", timeZone: "Australia/Melbourne" },
+      status: { name: "Scheduled", code: "SCHED" },
+    })),
+  };
+}
+
+function makePaginatedFixture(): FixtureResponse {
+  return {
+    competitionName: "AFL Premiership",
+    phases: [
+      {
+        rounds: [makeManyMatchesFixture(1, 20), makeManyMatchesFixture(2, 20)],
+      },
+    ],
+  };
+}
+
+function cardCountIn(el: HTMLElement) {
+  return el.querySelectorAll('[data-slot="card"]').length;
+}
+
 function renderHome() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
@@ -171,6 +214,59 @@ describe("Home page (integration)", () => {
     expect(
       await screen.findByText("No matches for this selection")
     ).toBeInTheDocument();
+  });
+
+  it("paginates the match list to 15 cards per page", async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => makePaginatedFixture(),
+    });
+    const { user } = renderHome();
+
+    await screen.findByText("Round 1 Home 1");
+
+    const list = screen.getByTestId("match-list");
+    expect(cardCountIn(list)).toBe(15);
+    expect(screen.getByText("Page 1 of 3")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Previous" })).toBeDisabled();
+
+    await user.click(screen.getByRole("button", { name: "Next" }));
+
+    expect(cardCountIn(list)).toBe(15);
+    expect(screen.getByText("Page 2 of 3")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Next" }));
+
+    expect(cardCountIn(list)).toBe(10);
+    expect(screen.getByText("Page 3 of 3")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
+  });
+
+  it("resets to page 1 when a filter changes", async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => makePaginatedFixture(),
+    });
+    const { user } = renderHome();
+    await screen.findByText("Round 1 Home 1");
+
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    expect(screen.getByText("Page 2 of 3")).toBeInTheDocument();
+
+    const { round } = getFilterComboboxes();
+    await user.click(round);
+    await user.click(await screen.findByRole("option", { name: "Round 1" }));
+
+    expect(screen.getByText("Page 1 of 2")).toBeInTheDocument();
+  });
+
+  it("hides pagination controls when everything fits on one page", async () => {
+    renderHome();
+    await screen.findByText("Richmond");
+
+    expect(screen.queryByRole("navigation", { name: "Pagination" })).not.toBeInTheDocument();
   });
 
   it("shows an error message when the fixture request fails", async () => {
